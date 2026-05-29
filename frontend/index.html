@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Management App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>📚 AI Study Management App</h1>
+
+        <div class="top-section">
+
+            <!-- Input Form -->
+
+            <div class="card">
+
+                <h2>Create Study Goal</h2>
+
+                <label>Subject</label>
+                <input type="text" id="subject" placeholder="Psychology">
+
+                <label>Total Study Hours</label>
+                <input type="number" id="hours" placeholder="6">
+
+                <label>Exam Date</label>
+                <input type="date" id="examDate">
+
+                <label>Difficulty</label>
+                <select id="difficulty">
+                    <option>Easy</option>
+                    <option>Medium</option>
+                    <option>Hard</option>
+                </select>
+
+                <label>Preferred Slot</label>
+                <select id="slot">
+                    <option>Morning</option>
+                    <option>Afternoon</option>
+                    <option>Evening</option>
+                </select>
+
+                <button onclick="generatePlan()">
+                    Generate Study Plan
+                </button>
+
+            </div>
+
+            <!-- Dashboard -->
+
+            <div class="card">
+
+                <h2>Dashboard</h2>
+
+                <div class="dashboard-card">
+                    <span>Subjects</span>
+                    <strong id="totalSubjects">0</strong>
+                </div>
+
+                <div class="dashboard-card">
+                    <span>Planned Hours</span>
+                    <strong id="plannedHours">0</strong>
+                </div>
+
+                <div class="dashboard-card">
+                    <span>Completed Hours</span>
+                    <strong id="completedHours">0</strong>
+                </div>
+
+                <div class="dashboard-card">
+                    <span>Progress</span>
+                    <strong id="progress">0%</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Generated Plan -->
+
+        <div class="card">
+
+            <h2>Generated Study Plan</h2>
+
+            <div id="planContainer">
+                No plan generated.
+            </div>
+
+        </div>
+
+        <!-- Task Tracker -->
+
+        <div class="card">
+
+            <h2>Task Tracker</h2>
+
+            <div id="taskTracker">
+                No tasks available.
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        let plannedHours = 0;
+        let completedHours = 0;
+        let subjectCount = 0;
+
+        function generatePlan() {
+
+            const subject =
+                document.getElementById("subject").value;
+
+            const totalHours =
+                parseInt(document.getElementById("hours").value);
+
+            if (!subject || !totalHours) {
+
+                alert("Please enter subject and hours");
+                return;
+            }
+
+            subjectCount = 1;
+            plannedHours = totalHours;
+            completedHours = 0;
+
+            updateDashboard();
+
+            let remaining = totalHours;
+            let day = 1;
+
+            let planHTML = "";
+            let taskHTML = "";
+
+            while (remaining > 0) {
+
+                let sessionHours =
+                    Math.min(2, remaining);
+
+                planHTML += `
+                    <div class="plan-item">
+                        Day ${day} - ${subject} - ${sessionHours} hrs
+                    </div>
+                `;
+
+                taskHTML += `
+                    <div class="task-item">
+                        <input
+                            type="checkbox"
+                            onchange="updateTask(this, ${sessionHours})">
+
+                        Day ${day} - ${subject}
+                        (${sessionHours} hrs)
+                    </div>
+                `;
+
+                remaining -= sessionHours;
+                day++;
+            }
+
+            document.getElementById("planContainer")
+                .innerHTML = planHTML;
+
+            document.getElementById("taskTracker")
+                .innerHTML = taskHTML;
+        }
+
+        function updateTask(checkbox, hours) {
+
+            if (checkbox.checked) {
+                completedHours += hours;
+            } else {
+                completedHours -= hours;
+            }
+
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+
+            document.getElementById("totalSubjects")
+                .innerText = subjectCount;
+
+            document.getElementById("plannedHours")
+                .innerText = plannedHours;
+
+            document.getElementById("completedHours")
+                .innerText = completedHours;
+
+            let progress = 0;
+
+            if (plannedHours > 0) {
+
+                progress =
+                    ((completedHours / plannedHours) * 100)
+                    .toFixed(0);
+            }
+
+            document.getElementById("progress")
+                .innerText = progress + "%";
+        }
+
+    </script>
+
+</body>
+
+</html>
