@@ -1,8 +1,11 @@
-class StudeyModel():
-    subjects: str
-    total_hours: float
-    difficulty_level: str
-    exam_date: datetime
-    preferred_study_times:str
+from pydantic import BaseModel
+class StudyGoal(BaseModel):
+    subject: str
+    total_hours: int
+    difficulty: str
+    preferred_slot: str
+    exam_date: str
 
+# class TaskUpdate(BaseModel):
 
+#     status: str

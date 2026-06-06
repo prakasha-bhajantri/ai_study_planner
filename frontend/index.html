@@ -12,11 +12,14 @@
 
     <div class="container">
 
-        <h1>📚 AI Study Management App</h1>
+        <header>
+            <h1>📚 AI Study Management App</h1>
+            <p>Plan Smarter. Study Better.</p>
+        </header>
 
         <div class="top-section">
 
-            <!-- Input Form -->
+            <!-- Create Study Goal -->
 
             <div class="card">
 
@@ -57,24 +60,40 @@
 
                 <h2>Dashboard</h2>
 
-                <div class="dashboard-card">
+                <div class="dashboard-item">
                     <span>Subjects</span>
-                    <strong id="totalSubjects">0</strong>
+                    <strong id="subjectsCount">0</strong>
                 </div>
 
-                <div class="dashboard-card">
+                <div class="dashboard-item">
                     <span>Planned Hours</span>
                     <strong id="plannedHours">0</strong>
                 </div>
 
-                <div class="dashboard-card">
+                <div class="dashboard-item">
                     <span>Completed Hours</span>
                     <strong id="completedHours">0</strong>
                 </div>
 
-                <div class="dashboard-card">
+                <div class="dashboard-item">
                     <span>Progress</span>
                     <strong id="progress">0%</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- AI Recommendations -->
+
+        <div class="card">
+
+            <h2>🤖 AI Recommendations</h2>
+
+            <div id="recommendations">
+
+                <div class="recommendation-item">
+                    Create a study goal to get recommendations.
                 </div>
 
             </div>
@@ -85,10 +104,12 @@
 
         <div class="card">
 
-            <h2>Generated Study Plan</h2>
+            <h2>📅 Generated Study Plan</h2>
 
             <div id="planContainer">
-                No plan generated.
+
+                No study plan generated.
+
             </div>
 
         </div>
@@ -97,10 +118,12 @@
 
         <div class="card">
 
-            <h2>Task Tracker</h2>
+            <h2>✅ Task Tracker</h2>
 
             <div id="taskTracker">
+
                 No tasks available.
+
             </div>
 
         </div>
@@ -109,103 +132,281 @@
 
     <script>
 
-        let plannedHours = 0;
-        let completedHours = 0;
-        let subjectCount = 0;
+        const API_BASE = "http://localhost:8000";
 
-        function generatePlan() {
+        async function generatePlan() {
 
-            const subject =
-                document.getElementById("subject").value;
+            const payload = {
 
-            const totalHours =
-                parseInt(document.getElementById("hours").value);
+                subject: document.getElementById("subject").value,
 
-            if (!subject || !totalHours) {
+                total_hours: parseInt(
+                    document.getElementById("hours").value
+                ),
 
-                alert("Please enter subject and hours");
-                return;
+                difficulty:
+                    document.getElementById("difficulty").value,
+
+                preferred_slot:
+                    document.getElementById("slot").value,
+
+                exam_date:
+                    document.getElementById("examDate").value
+            };
+
+            try {
+
+                const response = await fetch(
+                    `${API_BASE}/generate-plan`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(payload)
+                    }
+                );
+
+                const data = await response.json();
+
+                console.log(data);
+
+                renderStudyPlan(data.plan);
+
+                await loadDashboard();
+                await loadTasks();
+                await loadRecommendations();
+
             }
+            catch (error) {
 
-            subjectCount = 1;
-            plannedHours = totalHours;
-            completedHours = 0;
+                console.error(error);
 
-            updateDashboard();
+                alert(
+                    "Unable to connect to backend API."
+                );
 
-            let remaining = totalHours;
-            let day = 1;
+            }
+        }
 
-            let planHTML = "";
-            let taskHTML = "";
+        function renderStudyPlan(plan) {
 
-            while (remaining > 0) {
+            let html = "";
 
-                let sessionHours =
-                    Math.min(2, remaining);
+            plan.forEach(item => {
 
-                planHTML += `
+                html += `
+
                     <div class="plan-item">
-                        Day ${day} - ${subject} - ${sessionHours} hrs
+
+                        <h4>Day ${item.day}</h4>
+
+                        <p>
+                            <strong>Subject:</strong>
+                            ${item.subject}
+                        </p>
+
+                        <p>
+                            <strong>Hours:</strong>
+                            ${item.hours}
+                        </p>
+
+                        <p>
+                            <strong>Difficulty:</strong>
+                            ${item.difficulty}
+                        </p>
+
+                        <p>
+                            <strong>Preferred Slot:</strong>
+                            ${item.preferred_slot}
+                        </p>
+
                     </div>
+
                 `;
+            });
 
-                taskHTML += `
-                    <div class="task-item">
-                        <input
-                            type="checkbox"
-                            onchange="updateTask(this, ${sessionHours})">
-
-                        Day ${day} - ${subject}
-                        (${sessionHours} hrs)
-                    </div>
-                `;
-
-                remaining -= sessionHours;
-                day++;
-            }
-
-            document.getElementById("planContainer")
-                .innerHTML = planHTML;
-
-            document.getElementById("taskTracker")
-                .innerHTML = taskHTML;
+            document.getElementById(
+                "planContainer"
+            ).innerHTML = html;
         }
 
-        function updateTask(checkbox, hours) {
+        async function loadDashboard() {
 
-            if (checkbox.checked) {
-                completedHours += hours;
-            } else {
-                completedHours -= hours;
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_BASE}/dashboard`
+                    );
+
+                const data =
+                    await response.json();
+
+                document.getElementById(
+                    "subjectsCount"
+                ).innerText = data.subjects;
+
+                document.getElementById(
+                    "plannedHours"
+                ).innerText = data.planned_hours;
+
+                document.getElementById(
+                    "completedHours"
+                ).innerText = data.completed_hours;
+
+                document.getElementById(
+                    "progress"
+                ).innerText = data.progress + "%";
+
             }
+            catch (error) {
 
-            updateDashboard();
+                console.error(
+                    "Dashboard Error",
+                    error
+                );
+
+            }
         }
 
-        function updateDashboard() {
+        async function loadTasks() {
 
-            document.getElementById("totalSubjects")
-                .innerText = subjectCount;
+            try {
 
-            document.getElementById("plannedHours")
-                .innerText = plannedHours;
+                const response =
+                    await fetch(
+                        `${API_BASE}/tasks`
+                    );
 
-            document.getElementById("completedHours")
-                .innerText = completedHours;
+                const tasks =
+                    await response.json();
 
-            let progress = 0;
+                let html = "";
 
-            if (plannedHours > 0) {
+                tasks.forEach(task => {
 
-                progress =
-                    ((completedHours / plannedHours) * 100)
-                    .toFixed(0);
+                    html += `
+
+                        <div class="task-item">
+
+                            <input
+                                type="checkbox"
+                                ${task.status === "completed"
+                            ? "checked"
+                            : ""}
+                                onchange="updateTask(${task.id})">
+
+                            <span>
+
+                                <strong>
+                                    ${task.subject}
+                                </strong>
+
+                                | Day ${task.day}
+
+                                | ${task.hours} hrs
+
+                                | ${task.status}
+
+                            </span>
+
+                        </div>
+
+                    `;
+                });
+
+                document.getElementById(
+                    "taskTracker"
+                ).innerHTML = html;
+
             }
+            catch (error) {
 
-            document.getElementById("progress")
-                .innerText = progress + "%";
+                console.error(
+                    "Task Error",
+                    error
+                );
+
+            }
         }
+
+        async function updateTask(taskId) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_BASE}/tasks/${taskId}`,
+                        {
+                            method: "PATCH"
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                console.log(data);
+
+                await loadTasks();
+                await loadDashboard();
+                await loadRecommendations();
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Task Update Error",
+                    error
+                );
+
+            }
+        }
+
+        async function loadRecommendations() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_BASE}/recommendations`
+                    );
+
+                const data =
+                    await response.json();
+
+                let html = "";
+
+                data.recommendations.forEach(rec => {
+
+                    html += `
+                        <div class="recommendation-item">
+                            ${rec}
+                        </div>
+                    `;
+
+                });
+
+                document.getElementById(
+                    "recommendations"
+                ).innerHTML = html;
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Recommendation Error",
+                    error
+                );
+
+            }
+        }
+
+        // Initial Load
+
+        loadDashboard();
+        loadTasks();
+        loadRecommendations();
 
     </script>
 
