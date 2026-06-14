@@ -51,12 +51,12 @@ async def create_study_plan(goal:StudyGoal):
 
 
 @app.get("/tasks")
-def get_tasks():
+async def get_tasks():
     return tasks
 
 
 @app.patch("/tasks/{task_id}")
-def update_task(task_id: int):
+async def update_task(task_id: int):
     for task in tasks:
         if task["id"] == task_id:
             if task["status"] == "completed":
@@ -70,7 +70,7 @@ def update_task(task_id: int):
 
 
 @app.get("/dashboard")
-def get_dashboard():
+async def get_dashboard():
     subjects = len(
         set(
             goal["subject"] for goal in study_goals
@@ -101,7 +101,7 @@ def get_dashboard():
 
 
 @app.get("/recommendations")
-def get_recommendations():
+async def get_recommendations():
 
     recommendations = []
 
@@ -166,6 +166,16 @@ def get_recommendations():
 
     return {
         "recommendations": recommendations
+    }
+
+
+@app.post("/chat")
+async def chat(payload: dict):
+
+    query = payload.get("query")
+
+    return {
+        "response": f"Its in Testing - You asked: {query}"
     }
 
 # around 5 to 6 apis will create for the study planner, 

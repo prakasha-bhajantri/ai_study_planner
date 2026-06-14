@@ -2,127 +2,172 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Study Management App</title>
-    <link rel="stylesheet" href="style.css">
-</head>
 
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        AI Study Management Platform
+    </title>
+
+    <!-- Full Calendar -->
+
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js">
+    </script>
+
+    <!-- Chart JS -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<div id="toast" class="toast"></div>
 <body>
 
-    <div class="container">
+    <div class="app-container">
 
-        <header>
-            <h1>📚 AI Study Management App</h1>
-            <p>Plan Smarter. Study Better.</p>
-        </header>
+        <!-- Sidebar -->
 
-        <div class="top-section">
+        <aside class="sidebar">
 
-            <!-- Create Study Goal -->
+            <div class="logo-container">
+
+                <div class="logo">
+
+                    📚
+
+                </div>
+
+                <h2>
+
+                    SMP
+
+                </h2>
+
+            </div>
+
+            <nav>
+
+                <ul>
+
+                    <li class="nav-item active"
+                        onclick="showPage('dashboard-page', this)">
+                        📊 Dashboard
+                    </li>
+
+                    <li class="nav-item"
+                        onclick="showPage('calendar-page', this)">
+                        📅 Calendar
+                    </li>
+
+                    <li class="nav-item"
+                        onclick="showPage('tasks-page', this)">
+                        ✅ Tasks
+                    </li>
+
+                    <li class="nav-item"
+                        onclick="showPage('settings-page', this)">
+                        ⚙️ Settings
+                    </li>
+
+                    <li class="nav-item"
+                        onclick="showPage('account-page', this)">
+                        👤 Account
+                    </li>
+
+                </ul>
+
+            </nav>
+
+        </aside>
+
+        <!-- Content -->
+
+        <main class="main-content">
+
+            <!-- DASHBOARD -->
+
+            <section id="dashboard-page" class="page">
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>Today's Schedule</h1>
+
+            <p>Study Smarter. Learn Faster.</p>
+
+        </div>
+
+        <button class="primary-btn"
+                onclick="openModal()">
+
+            + Create Study Plan
+
+        </button>
+
+    </div>
+
+    <!-- DASHBOARD LAYOUT -->
+
+    <div class="dashboard-layout">
+
+        <!-- LEFT SIDE -->
+
+        <div class="schedule-card">
+
+            <div class="card-header">
+
+                <h3>Schedule View</h3>
+
+            </div>
+
+            <!-- ADD THIS -->
+
+            <div id="scheduleContainer">
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE -->
+
+        <div class="right-column">
 
             <div class="card">
 
-                <h2>Create Study Goal</h2>
+                <div class="card-header">
 
-                <label>Subject</label>
-                <input type="text" id="subject" placeholder="Psychology">
+                    <h3>Today's Tasks</h3>
 
-                <label>Total Study Hours</label>
-                <input type="number" id="hours" placeholder="6">
+                </div>
 
-                <label>Exam Date</label>
-                <input type="date" id="examDate">
+                <div id="taskTracker">
 
-                <label>Difficulty</label>
-                <select id="difficulty">
-                    <option>Easy</option>
-                    <option>Medium</option>
-                    <option>Hard</option>
-                </select>
-
-                <label>Preferred Slot</label>
-                <select id="slot">
-                    <option>Morning</option>
-                    <option>Afternoon</option>
-                    <option>Evening</option>
-                </select>
-
-                <button onclick="generatePlan()">
-                    Generate Study Plan
-                </button>
+                </div>
 
             </div>
-
-            <!-- Dashboard -->
 
             <div class="card">
 
-                <h2>Dashboard</h2>
+                <div class="card-header">
 
-                <div class="dashboard-item">
-                    <span>Subjects</span>
-                    <strong id="subjectsCount">0</strong>
+                    <h3>Day Completion</h3>
+
                 </div>
 
-                <div class="dashboard-item">
-                    <span>Planned Hours</span>
-                    <strong id="plannedHours">0</strong>
+                <div class="completion-box">
+
+                    <div id="completionCircle">
+                        0%
+                    </div>
+
                 </div>
-
-                <div class="dashboard-item">
-                    <span>Completed Hours</span>
-                    <strong id="completedHours">0</strong>
-                </div>
-
-                <div class="dashboard-item">
-                    <span>Progress</span>
-                    <strong id="progress">0%</strong>
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- AI Recommendations -->
-
-        <div class="card">
-
-            <h2>🤖 AI Recommendations</h2>
-
-            <div id="recommendations">
-
-                <div class="recommendation-item">
-                    Create a study goal to get recommendations.
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- Generated Plan -->
-
-        <div class="card">
-
-            <h2>📅 Generated Study Plan</h2>
-
-            <div id="planContainer">
-
-                No study plan generated.
-
-            </div>
-
-        </div>
-
-        <!-- Task Tracker -->
-
-        <div class="card">
-
-            <h2>✅ Task Tracker</h2>
-
-            <div id="taskTracker">
-
-                No tasks available.
 
             </div>
 
@@ -130,285 +175,342 @@
 
     </div>
 
-    <script>
+    <div class="card energy-card">
 
-        const API_BASE = "http://localhost:8000";
+    <div class="card-header">
 
-        async function generatePlan() {
+        <h3>
 
-            const payload = {
+            Energy Level & Subject Analysis
 
-                subject: document.getElementById("subject").value,
+        </h3>
 
-                total_hours: parseInt(
-                    document.getElementById("hours").value
-                ),
+    </div>
 
-                difficulty:
-                    document.getElementById("difficulty").value,
+    <canvas id="energyChart"></canvas>
 
-                preferred_slot:
-                    document.getElementById("slot").value,
+</div>
+</section>
 
-                exam_date:
-                    document.getElementById("examDate").value
-            };
+            <!-- CALENDAR -->
 
-            try {
+            <section id="calendar-page" class="page hidden">
 
-                const response = await fetch(
-                    `${API_BASE}/generate-plan`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify(payload)
-                    }
-                );
+                <div class="page-header">
 
-                const data = await response.json();
+                    <h1>
 
-                console.log(data);
+                        Calendar
 
-                renderStudyPlan(data.plan);
+                    </h1>
 
-                await loadDashboard();
-                await loadTasks();
-                await loadRecommendations();
+                    <button class="primary-btn" onclick="openModal()">
 
-            }
-            catch (error) {
+                        + Create Study Plan
 
-                console.error(error);
+                    </button>
 
-                alert(
-                    "Unable to connect to backend API."
-                );
+                </div>
 
-            }
-        }
+                <div class="card">
 
-        function renderStudyPlan(plan) {
-
-            let html = "";
-
-            plan.forEach(item => {
-
-                html += `
-
-                    <div class="plan-item">
-
-                        <h4>Day ${item.day}</h4>
-
-                        <p>
-                            <strong>Subject:</strong>
-                            ${item.subject}
-                        </p>
-
-                        <p>
-                            <strong>Hours:</strong>
-                            ${item.hours}
-                        </p>
-
-                        <p>
-                            <strong>Difficulty:</strong>
-                            ${item.difficulty}
-                        </p>
-
-                        <p>
-                            <strong>Preferred Slot:</strong>
-                            ${item.preferred_slot}
-                        </p>
+                    <div id="calendar">
 
                     </div>
 
-                `;
-            });
+                </div>
 
-            document.getElementById(
-                "planContainer"
-            ).innerHTML = html;
-        }
+            </section>
 
-        async function loadDashboard() {
+            <!-- TASKS -->
 
-            try {
+            <section id="tasks-page" class="page hidden">
 
-                const response =
-                    await fetch(
-                        `${API_BASE}/dashboard`
-                    );
+                <div class="page-header">
 
-                const data =
-                    await response.json();
+                    <h1>
 
-                document.getElementById(
-                    "subjectsCount"
-                ).innerText = data.subjects;
+                        Tasks
 
-                document.getElementById(
-                    "plannedHours"
-                ).innerText = data.planned_hours;
+                    </h1>
 
-                document.getElementById(
-                    "completedHours"
-                ).innerText = data.completed_hours;
+                    <button class="primary-btn">
 
-                document.getElementById(
-                    "progress"
-                ).innerText = data.progress + "%";
+                        + Create Task
 
-            }
-            catch (error) {
+                    </button>
 
-                console.error(
-                    "Dashboard Error",
-                    error
-                );
+                </div>
 
-            }
-        }
+                <div class="card">
 
-        async function loadTasks() {
+                    <div id="allTasksContainer">
 
-            try {
+                    </div>
 
-                const response =
-                    await fetch(
-                        `${API_BASE}/tasks`
-                    );
+                </div>
 
-                const tasks =
-                    await response.json();
+            </section>
 
-                let html = "";
+            <!-- SETTINGS -->
 
-                tasks.forEach(task => {
+            <section id="settings-page" class="page hidden">
 
-                    html += `
+                <div class="page-header">
 
-                        <div class="task-item">
+                    <h1>
 
-                            <input
-                                type="checkbox"
-                                ${task.status === "completed"
-                            ? "checked"
-                            : ""}
-                                onchange="updateTask(${task.id})">
+                        Settings
 
-                            <span>
+                    </h1>
 
-                                <strong>
-                                    ${task.subject}
-                                </strong>
+                </div>
 
-                                | Day ${task.day}
+                <div class="theme-option">
 
-                                | ${task.hours} hrs
+                    <input
+                        type="radio"
+                        id="lightTheme"
+                        name="theme"
+                        value="light"
+                        onchange="setTheme('light')">
 
-                                | ${task.status}
+                    <label for="lightTheme">
 
-                            </span>
+                        ☀️ Light Theme
 
-                        </div>
+                    </label>
 
-                    `;
-                });
+                </div>
 
-                document.getElementById(
-                    "taskTracker"
-                ).innerHTML = html;
+                <div class="theme-option">
 
-            }
-            catch (error) {
+                    <input
+                        type="radio"
+                        id="darkTheme"
+                        name="theme"
+                        value="dark"
+                        onchange="setTheme('dark')">
 
-                console.error(
-                    "Task Error",
-                    error
-                );
+                    <label for="darkTheme">
 
-            }
-        }
+                        🌙 Dark Theme
 
-        async function updateTask(taskId) {
+                    </label>
 
-            try {
+                </div>
 
-                const response =
-                    await fetch(
-                        `${API_BASE}/tasks/${taskId}`,
-                        {
-                            method: "PATCH"
-                        }
-                    );
+            </section>
 
-                const data =
-                    await response.json();
+            <!-- ACCOUNT -->
 
-                console.log(data);
+            <section id="account-page" class="page hidden">
 
-                await loadTasks();
-                await loadDashboard();
-                await loadRecommendations();
+                <div class="page-header">
 
-            }
-            catch (error) {
+                    <h1>
 
-                console.error(
-                    "Task Update Error",
-                    error
-                );
+                        Account
 
-            }
-        }
+                    </h1>
 
-        async function loadRecommendations() {
+                </div>
 
-            try {
+                <div class="card">
 
-                const response =
-                    await fetch(
-                        `${API_BASE}/recommendations`
-                    );
+                    <h3>
 
-                const data =
-                    await response.json();
+                        Student Profile
 
-                let html = "";
+                    </h3>
 
-                data.recommendations.forEach(rec => {
+                    <br>
 
-                    html += `
-                        <div class="recommendation-item">
-                            ${rec}
-                        </div>
-                    `;
+                    Name:
+                    Student
 
-                });
+                    <br>
 
-                document.getElementById(
-                    "recommendations"
-                ).innerHTML = html;
+                    Study Goals:
+                    0
 
-            }
-            catch (error) {
+                </div>
 
-                console.error(
-                    "Recommendation Error",
-                    error
-                );
+            </section>
 
-            }
-        }
+        </main>
 
-        // Initial Load
+    </div>
 
-        loadDashboard();
-        loadTasks();
-        loadRecommendations();
+    <!-- MODAL -->
 
-    </script>
+    <div id="studyModal" class="modal">
+
+        <div class="modal-content">
+
+            <h2>
+
+                Create Study Plan
+
+            </h2>
+
+            <input id="subject" type="text" placeholder="Subject">
+
+            <input id="hours" type="number" placeholder="Total Hours">
+
+            <input id="examDate" type="date">
+
+            <select id="difficulty">
+
+                <option>
+                    Easy
+                </option>
+
+                <option>
+                    Medium
+                </option>
+
+                <option>
+                    Hard
+                </option>
+
+            </select>
+
+            <select id="slot">
+
+                <option>
+                    Morning
+                </option>
+
+                <option>
+                    Afternoon
+                </option>
+
+                <option>
+                    Evening
+                </option>
+
+            </select>
+
+            <button class="primary-btn" onclick="generatePlan()">
+
+                Generate Plan
+
+            </button>
+
+            <button class="secondary-btn" onclick="closeModal()">
+
+                Cancel
+
+            </button>
+
+        </div>
+
+    </div>
+
+<!-- CHAT BUTTON -->
+
+    <button class="chat-button" onclick="toggleChat()">
+
+        🤖
+
+    </button>
+
+    <!-- CHAT WINDOW -->
+
+    <div id="chatWindow" class="chat-window">
+
+        <div class="chat-header">
+
+            <div class="chat-title">
+
+                <div class="ai-avatar">
+
+                    🤖
+
+                </div>
+
+                <div>
+
+                    <h4>
+
+                        AI Study Coach
+
+                    </h4>
+
+                    <span>
+
+                        Online
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <button
+                class="close-btn"
+                onclick="toggleChat()">
+
+                ✕
+
+            </button>
+
+        </div>
+
+        <div
+            id="chatMessages"
+            class="chat-messages">
+
+            <div class="ai-message">
+
+                👋 Welcome!
+
+                <br><br>
+
+                I can help you:
+
+                <br>
+
+                • Create study plans
+
+                <br>
+
+                • Recommend study schedules
+
+                <br>
+
+                • Track progress
+
+                <br>
+
+                • Suggest revision strategies
+
+            </div>
+
+        </div>
+
+        <div class="chat-input-area">
+
+            <input
+                id="chatInput"
+                type="text"
+                placeholder="Ask your study coach..."
+                onkeydown="if(event.key==='Enter'){sendMessage()}">
+
+            <button
+                class="send-btn"
+                onclick="sendMessage()">
+
+                ➤
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
 
 </body>
 
