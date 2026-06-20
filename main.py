@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
-from models import StudyGoal
-from scheduler import generate_study_plan
-from storage import study_goals, tasks
+from backend.models import StudyGoal
+from backend.scheduler import generate_study_plan
+from backend.storage import study_goals, tasks
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -99,74 +99,129 @@ async def get_dashboard():
             "progress": progress
            }
 
-
 @app.get("/recommendations")
 async def get_recommendations():
 
-    recommendations = []
+    total_tasks = len(tasks)
 
-    pending_tasks = [
-        task for task in tasks
-        if task["status"] == "pending"
-    ]
-
-    completed_tasks = [
+    completed_tasks = len([
         task for task in tasks
         if task["status"] == "completed"
-    ]
+    ])
 
-    total_tasks = len(tasks)
+    pending_tasks = total_tasks - completed_tasks
 
     progress = 0
 
     if total_tasks > 0:
-        progress = (
-            len(completed_tasks) / total_tasks
-        ) * 100
-
-    # Rule 1
+        progress = round(
+            (completed_tasks / total_tasks) * 100
+        )
 
     if progress < 30:
-        recommendations.append(
-            "⚠️ You are behind schedule. Complete at least one session today."
+
+        recommendation = (
+            "⚠️ You are behind schedule. Complete at least one study session today."
         )
 
-    # Rule 2
+    elif progress < 70:
 
-    if len(pending_tasks) > 5:
-        recommendations.append(
-            "📚 Multiple study sessions are pending. Consider increasing study hours."
+        recommendation = (
+            "📚 Good progress. Focus on completing pending tasks."
         )
 
-    # Rule 3
+    elif progress < 100:
 
-    hard_subjects = [
-        task for task in pending_tasks
-        if task.get("difficulty") == "Hard"
-    ]
-
-    if len(hard_subjects) > 0:
-        recommendations.append(
-            "🔥 Focus on hard subjects first."
+        recommendation = (
+            "🔥 Great work! You're almost finished."
         )
 
-    # Rule 4
+    else:
 
-    if progress >= 80:
-        recommendations.append(
-            "🎉 Great progress! Focus on revision."
+        recommendation = (
+            "🎉 Congratulations! All study sessions completed."
         )
-
-    # Default
-
-    if len(recommendations) == 0:
-        recommendations.append(
-            "✅ You are on track with your study plan."
-        )
-
+    print(recommendation)
     return {
-        "recommendations": recommendations
+
+        "progress": progress,
+
+        "completed_tasks": completed_tasks,
+
+        "pending_tasks": pending_tasks,
+
+        "total_tasks": total_tasks,
+
+        "recommendation": recommendation
     }
+
+# @app.get("/recommendations")
+# async def get_recommendations():
+
+#     recommendations = []
+
+#     pending_tasks = [
+#         task for task in tasks
+#         if task["status"] == "pending"
+#     ]
+
+#     completed_tasks = [
+#         task for task in tasks
+#         if task["status"] == "completed"
+#     ]
+
+#     total_tasks = len(tasks)
+
+#     progress = 0
+
+#     if total_tasks > 0:
+#         progress = (
+#             len(completed_tasks) / total_tasks
+#         ) * 100
+
+#     # Rule 1
+
+#     if progress < 30:
+#         recommendations.append(
+#             "⚠️ You are behind schedule. Complete at least one session today."
+#         )
+
+#     # Rule 2
+
+#     if len(pending_tasks) > 5:
+#         recommendations.append(
+#             "📚 Multiple study sessions are pending. Consider increasing study hours."
+#         )
+
+#     # Rule 3
+
+#     hard_subjects = [
+#         task for task in pending_tasks
+#         if task.get("difficulty") == "Hard"
+#     ]
+
+#     if len(hard_subjects) > 0:
+#         recommendations.append(
+#             "🔥 Focus on hard subjects first."
+#         )
+
+#     # Rule 4
+
+#     if progress >= 80:
+#         recommendations.append(
+#             "🎉 Great progress! Focus on revision."
+#         )
+
+#     # Default
+
+#     if len(recommendations) == 0:
+#         recommendations.append(
+#             "✅ You are on track with your study plan."
+#         )
+
+#     return {
+#         "recommendations": recommendations
+#     }
 
 
 @app.post("/chat")

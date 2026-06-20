@@ -489,6 +489,32 @@ body {
         rgba(99,102,241,0.10);
 }
 
+.completion-box {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+.completion-recommendation {
+
+    margin-top: 20px;
+
+    text-align: center;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    max-width: 280px;
+
+    color: var(--text-secondary);
+}
+
 /* =========================
    CHART
 ========================= */

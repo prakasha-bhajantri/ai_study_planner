@@ -154,7 +154,8 @@ async function generatePlan() {
 
         await loadDashboard();
         await loadTasks();
-        await loadRecommendations();
+        // await loadRecommendations();
+        await loadCompletionRecommendation();
 
         showToast(
             "✅ Study Plan Created Successfully"
@@ -372,7 +373,8 @@ async function updateTask(taskId) {
 
         await loadTasks();
         await loadDashboard();
-        await loadRecommendations();
+        // await loadRecommendations();
+        await loadCompletionRecommendation();
 
     }
     catch (error) {
@@ -411,49 +413,12 @@ function showToast(message) {
    SCHEDULE VIEW
 =================================== */
 
-function renderSchedule(tasks) {
-
-    const schedule =
-        document.getElementById(
-            "scheduleContainer"
-        );
-
-    if (!schedule)
-        return;
-
-    let html = "";
-
-    tasks.slice(0, 5)
-        .forEach((task, index) => {
-
-            html += `
-
-                <div class="timeline-item">
-
-                    <span>
-                        ${9 + index}:00
-                    </span>
-
-                    <div>
-
-                        ${task.subject}
-
-                    </div>
-
-                </div>
-
-            `;
-        });
-
-    schedule.innerHTML =
-        html;
-}
 
 /* ===================================
    RECOMMENDATIONS
 =================================== */
 
-async function loadRecommendations() {
+async function loadCompletionRecommendation() {
 
     try {
 
@@ -465,33 +430,33 @@ async function loadRecommendations() {
         const data =
             await response.json();
 
-        let html = "";
-
-        data.recommendations
-            .forEach(rec => {
-
-                html += `
-
-                    <div class="recommendation">
-
-                        ${rec}
-
-                    </div>
-
-                `;
-            });
-
-        const recommendations =
+        const recommendationDiv =
             document.getElementById(
-                "recommendations"
+                "completionRecommendation"
             );
 
-        if (recommendations)
-            recommendations.innerHTML =
-                html;
+        if (recommendationDiv) {
+
+            recommendationDiv.innerHTML = `
+
+                <strong>
+
+                    ${data.completed_tasks}
+                    /
+                    ${data.total_tasks}
+                    sessions completed
+
+                </strong>
+
+                <br><br>
+
+                ${data.recommendation}
+
+            `;
+        }
 
     }
-    catch (error) {
+    catch(error) {
 
         console.error(error);
     }
@@ -620,18 +585,48 @@ async function sendMessage() {
 
 let calendar;
 
+// function initializeCalendar() {
+
+//     const calendarEl =
+//         document.getElementById("calendar");
+
+//     calendar =
+//         new FullCalendar.Calendar(
+//             calendarEl,
+//             {
+//                 initialView:
+//                     "dayGridMonth",
+
+//                 height: 700,
+
+//                 dateClick(info) {
+
+//                     openModal();
+
+//                     document.getElementById(
+//                         "examDate"
+//                     ).value =
+//                         info.dateStr;
+//                 }
+//             }
+//         );
+// }
+
 function initializeCalendar() {
 
     const calendarEl =
-        document.getElementById("calendar");
+        document.getElementById(
+            "calendar"
+        );
+
+    if (!calendarEl)
+        return;
 
     calendar =
         new FullCalendar.Calendar(
             calendarEl,
             {
-                initialView:
-                    "dayGridMonth",
-
+                initialView: "dayGridMonth",
                 height: 700,
 
                 dateClick(info) {
@@ -672,7 +667,8 @@ function initializeChart(tasks = []) {
             subjectHours[task.subject] = 0;
         }
 
-        subjectHours[task.subject] += task.hours;
+        // subjectHours[task.subject] += task.hours;
+        subjectHours[task.subject] += Number(task.hours);
     });
 
     const labels =
@@ -747,7 +743,8 @@ function renderSchedule(tasks){
     });
 
     container.innerHTML = html;
-    initializeChart(tasks);
+    // initializeChart(tasks);
+    initializeChart(tasks.slice(0, 5));
 }
 
 /* ===================================
@@ -800,7 +797,7 @@ if (selectedRadio) {
 
     await loadTasks();
 
-    await loadRecommendations();
+    await loadCompletionRecommendation();
 };
 
 
