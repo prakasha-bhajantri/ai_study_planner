@@ -3,7 +3,7 @@ from backend.models import StudyGoal, ChatRequest
 from backend.scheduler import generate_study_plan
 from backend.storage import study_goals, tasks
 from fastapi.middleware.cors import CORSMiddleware
-from llm import llm_chat
+from llm_v2 import llm_chat
 
 app = FastAPI(
     title="Study Planner API",

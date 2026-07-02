@@ -485,21 +485,173 @@ function toggleChat() {
     }
 }
 
+// async function sendMessage() {
+
+//     const input =
+//         document.getElementById(
+//             "chatInput"
+//         );
+
+//     if (!input)
+//         return;
+
+//     const message =
+//         input.value;
+
+//     if (!message)
+//         return;
+
+//     try {
+
+//         const response =
+//             await fetch(
+//                 `${API_BASE}/chat`,
+//                 {
+//                     method: "POST",
+//                     headers: {
+//                         "Content-Type":
+//                             "application/json"
+//                     },
+//                     body:
+//                         JSON.stringify({
+//                             query: message
+//                         })
+//                 }
+//             );
+
+//         const data =
+//             await response.json();
+
+//         const messages =
+//             document.getElementById(
+//                 "chatMessages"
+//             );
+
+//         if (messages) {
+
+//             messages.innerHTML += `
+
+//                 <div class="message-row user-row">
+
+//                     <div class="message-label">
+
+//                         User
+
+//                     </div>
+
+//                     <div class="user-message">
+
+//                         ${message}
+
+//                     </div>
+
+//                 </div>
+
+//                 <div class="message-row ai-row">
+
+//                     <div class="message-label">
+
+//                         AI Study Coach
+
+//                     </div>
+
+//                     <div class="ai-message">
+
+//                         ${data.response}
+
+//                     </div>
+
+//                 </div>
+
+//             `;
+
+//             messages.scrollTop =
+//                 messages.scrollHeight;
+//         }
+
+//         input.value = "";
+//         input.focus();
+
+//     }
+//     catch (error) {
+
+//         console.error(error);
+//     }
+// }
+
 async function sendMessage() {
 
     const input =
-        document.getElementById(
-            "chatInput"
-        );
+        document.getElementById("chatInput");
 
     if (!input)
         return;
 
-    const message =
-        input.value;
+    const message = input.value.trim();
 
     if (!message)
         return;
+
+    const messages =
+        document.getElementById("chatMessages");
+
+    // Immediately display user message
+    messages.innerHTML += `
+
+        <div class="message-row user-row">
+
+            <div class="message-label">
+
+                User
+
+            </div>
+
+            <div class="user-message">
+
+                ${message}
+
+            </div>
+
+        </div>
+
+    `;
+
+    // AI typing placeholder
+    const aiMessageId =
+        "ai-" + Date.now();
+
+    messages.innerHTML += `
+
+        <div class="message-row ai-row">
+
+            <div class="message-label">
+
+                AI Study Coach
+
+            </div>
+
+            <div
+                id="${aiMessageId}"
+                class="ai-message">
+
+                <span class="typing">
+
+                    Thinking...
+
+                </span>
+
+            </div>
+
+        </div>
+
+    `;
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+    input.value = "";
+
+    input.focus();
 
     try {
 
@@ -512,73 +664,33 @@ async function sendMessage() {
                         "Content-Type":
                             "application/json"
                     },
-                    body:
-                        JSON.stringify({
-                            query: message
-                        })
+                    body: JSON.stringify({
+                        query: message
+                    })
                 }
             );
 
         const data =
             await response.json();
 
-        const messages =
-            document.getElementById(
-                "chatMessages"
-            );
+        document.getElementById(
+            aiMessageId
+        ).innerHTML = data.response;
 
-        if (messages) {
-
-            messages.innerHTML += `
-
-                <div class="message-row user-row">
-
-                    <div class="message-label">
-
-                        User
-
-                    </div>
-
-                    <div class="user-message">
-
-                        ${message}
-
-                    </div>
-
-                </div>
-
-                <div class="message-row ai-row">
-
-                    <div class="message-label">
-
-                        AI Study Coach
-
-                    </div>
-
-                    <div class="ai-message">
-
-                        ${data.response}
-
-                    </div>
-
-                </div>
-
-            `;
-
-            messages.scrollTop =
-                messages.scrollHeight;
-        }
-
-        input.value = "";
-        input.focus();
+        messages.scrollTop =
+            messages.scrollHeight;
 
     }
     catch (error) {
 
+        document.getElementById(
+            aiMessageId
+        ).innerHTML =
+            "❌ Unable to get response.";
+
         console.error(error);
     }
 }
-
 /* ===================================
    CALENDAR
 =================================== */

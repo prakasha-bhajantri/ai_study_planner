@@ -21,13 +21,6 @@ llm = ChatOllama(
 )
 
 
-
-
-
-
-
-
-
 def llm_chat(query: str):
     # System Prompt
     system_template = """
@@ -78,11 +71,9 @@ User Question:
 
     return response_text
 
-
 # while True:
 #     user_input = input("User: ")
 #     if user_input.lower() == "exit":
 #         break
 #     response = llm_chat(user_input)
 #     print("AI Trip Planner:", response)
-
