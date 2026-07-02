@@ -7,3 +7,8 @@ class StudyGoal(BaseModel):
     difficulty: str
     preferred_slot: str
     exam_date: date
+
+from pydantic import BaseModel
+
+class ChatRequest(BaseModel):
+    query: str

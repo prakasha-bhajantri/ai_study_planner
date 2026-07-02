@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException
-from backend.models import StudyGoal
+from backend.models import StudyGoal, ChatRequest
 from backend.scheduler import generate_study_plan
 from backend.storage import study_goals, tasks
 from fastapi.middleware.cors import CORSMiddleware
+from llm import llm_chat
 
 app = FastAPI(
     title="Study Planner API",
@@ -225,12 +226,12 @@ async def get_recommendations():
 
 
 @app.post("/chat")
-async def chat(payload: dict):
-
-    query = payload.get("query")
+async def chat(request: ChatRequest):
+    
+    response = llm_chat(request.query)
 
     return {
-        "response": f"Its in Testing - You asked: {query}"
+        "response": response
     }
 
 # around 5 to 6 apis will create for the study planner, 
