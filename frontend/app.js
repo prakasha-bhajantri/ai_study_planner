@@ -1,9 +1,98 @@
 const API_BASE = "http://localhost:8000";
 
+
 /* ===================================
    NAVIGATION
 =================================== */
+let deadlineCalendar;
+let calendarOpen = false;
 
+function toggleDeadlineCalendar(){
+
+    const popup =
+        document.getElementById(
+            "deadlineCalendarPopup"
+        );
+
+    if(!deadlineCalendar){
+
+        initializeDeadlineCalendar();
+    }
+
+    calendarOpen = !calendarOpen;
+
+    popup.classList.toggle(
+        "hidden",
+        !calendarOpen
+    );
+
+    if(calendarOpen){
+
+        deadlineCalendar.updateSize();
+    }
+}
+
+function initializeDeadlineCalendar(){
+
+    const el =
+        document.getElementById(
+            "deadlineCalendar"
+        );
+
+    deadlineCalendar =
+        new FullCalendar.Calendar(
+            el,
+            {
+
+                initialView:"dayGridMonth",
+
+                height:280,
+
+                headerToolbar:{
+
+                    left:"prev,next",
+
+                    center:"title",
+
+                    right:""
+
+                },
+
+                dateClick(info){
+
+                    document.getElementById(
+                        "examDate"
+                    ).value =
+                        info.dateStr;
+
+                    const formatted =
+                        new Date(info.dateStr)
+                        .toLocaleDateString(
+                            "en-GB",
+                            {
+
+                                day:"numeric",
+
+                                month:"short",
+
+                                year:"numeric"
+
+                            }
+                        );
+
+                    document.getElementById(
+                        "selectedDeadline"
+                    ).innerHTML =
+                        "📅 " + formatted;
+
+                    toggleDeadlineCalendar();
+                }
+
+            }
+        );
+
+    deadlineCalendar.render();
+}
 function showPage(pageId, element) {
 
     document.querySelectorAll(".page")
@@ -23,30 +112,49 @@ function showPage(pageId, element) {
         element.classList.add("active");
     }
 
-    if(pageId === "calendar-page"){
+    if (pageId === "calendar-page") {
 
-    if(calendar){
+        if (calendar) {
 
-        calendar.render();
+            calendar.render();
 
-        setTimeout(() => {
+            setTimeout(() => {
 
-            calendar.updateSize();
+                calendar.updateSize();
 
-        }, 100);
+            }, 100);
+        }
     }
-}
 }
 
 /* ===================================
    MODAL
 =================================== */
 
-function openModal() {
+// function openModal() {
+
+//     document.getElementById(
+//         "studyModal"
+//     ).style.display = "flex";
+// }
+
+function openModal(){
 
     document.getElementById(
         "studyModal"
     ).style.display = "flex";
+
+    if(!deadlineCalendar){
+
+        initializeDeadlineCalendar();
+
+    }
+
+    setTimeout(()=>{
+
+        deadlineCalendar.updateSize();
+
+    },100);
 }
 
 function closeModal() {
@@ -79,6 +187,29 @@ function setTheme(theme) {
         "theme",
         theme
     );
+}
+
+/* ===================================
+   HELPERS
+=================================== */
+
+function formatHour(hour) {
+
+    if (hour === 24) {
+        return "12:00 AM";
+    }
+
+    const period =
+        hour >= 12 ? "PM" : "AM";
+
+    let displayHour =
+        hour % 12;
+
+    if (displayHour === 0) {
+        displayHour = 12;
+    }
+
+    return `${displayHour}:00 ${period}`;
 }
 
 /* ===================================
@@ -154,26 +285,19 @@ async function generatePlan() {
 
         await loadDashboard();
         await loadTasks();
-        // await loadRecommendations();
         await loadCompletionRecommendation();
 
         showToast(
             "✅ Study Plan Created Successfully"
         );
 
-    }
-    catch (error) {
+    } catch (error) {
 
         console.error(error);
 
-        // alert(
-        //     "Failed to create plan"
-        // );
         showToast(
-
-        "Failed to create plan. Please try again."
-);
-        
+            "Failed to create plan. Please try again."
+        );
     }
 }
 
@@ -213,21 +337,25 @@ async function loadDashboard() {
                 "progress"
             );
 
-        if (subjects)
+        if (subjects) {
             subjects.innerText =
                 data.subjects;
+        }
 
-        if (planned)
+        if (planned) {
             planned.innerText =
                 data.planned_hours;
+        }
 
-        if (completed)
+        if (completed) {
             completed.innerText =
                 data.completed_hours;
+        }
 
-        if (progress)
+        if (progress) {
             progress.innerText =
                 data.progress + "%";
+        }
 
         const circle =
             document.getElementById(
@@ -262,8 +390,7 @@ async function loadDashboard() {
             `;
         }
 
-    }
-    catch (error) {
+    } catch (error) {
 
         console.error(
             "Dashboard Error",
@@ -300,7 +427,13 @@ async function loadTasks() {
 
         let html = "";
 
-        tasks.forEach((task, index) => {
+        let currentStartHour =
+            9;
+
+        tasks.forEach((task) => {
+
+            const duration =
+                Number(task.hours);
 
             html += `
 
@@ -325,27 +458,30 @@ async function loadTasks() {
 
                     <div class="task-time">
 
-                        ${9 + index}:00 AM
+                        ${formatHour(currentStartHour)}
 
                     </div>
 
                 </div>
 
             `;
+
+            currentStartHour += duration;
         });
 
-        if (tracker)
+        if (tracker) {
             tracker.innerHTML =
                 html;
+        }
 
-        if (allTasks)
+        if (allTasks) {
             allTasks.innerHTML =
                 html;
+        }
 
         renderSchedule(tasks);
 
-    }
-    catch (error) {
+    } catch (error) {
 
         console.error(
             "Task Error",
@@ -373,18 +509,17 @@ async function updateTask(taskId) {
 
         await loadTasks();
         await loadDashboard();
-        // await loadRecommendations();
         await loadCompletionRecommendation();
 
-    }
-    catch (error) {
+    } catch (error) {
 
-        console.error(
-            error
-        );
+        console.error(error);
     }
 }
 
+/* ===================================
+   TOAST
+=================================== */
 
 function showToast(message) {
 
@@ -392,6 +527,10 @@ function showToast(message) {
         document.getElementById(
             "toast"
         );
+
+    if (!toast) {
+        return;
+    }
 
     toast.innerText =
         message;
@@ -408,11 +547,6 @@ function showToast(message) {
 
     }, 3000);
 }
-
-/* ===================================
-   SCHEDULE VIEW
-=================================== */
-
 
 /* ===================================
    RECOMMENDATIONS
@@ -455,8 +589,7 @@ async function loadCompletionRecommendation() {
             `;
         }
 
-    }
-    catch(error) {
+    } catch(error) {
 
         console.error(error);
     }
@@ -473,129 +606,49 @@ function toggleChat() {
             "chatWindow"
         );
 
-    if (
-        chat.style.display === "flex"
-    ) {
+    if (!chat) {
+        return;
+    }
 
-        chat.style.display = "none";
+    if (chat.style.display === "flex") {
+
+        chat.style.display =
+            "none";
 
     } else {
 
-        chat.style.display = "flex";
+        chat.style.display =
+            "flex";
     }
 }
-
-// async function sendMessage() {
-
-//     const input =
-//         document.getElementById(
-//             "chatInput"
-//         );
-
-//     if (!input)
-//         return;
-
-//     const message =
-//         input.value;
-
-//     if (!message)
-//         return;
-
-//     try {
-
-//         const response =
-//             await fetch(
-//                 `${API_BASE}/chat`,
-//                 {
-//                     method: "POST",
-//                     headers: {
-//                         "Content-Type":
-//                             "application/json"
-//                     },
-//                     body:
-//                         JSON.stringify({
-//                             query: message
-//                         })
-//                 }
-//             );
-
-//         const data =
-//             await response.json();
-
-//         const messages =
-//             document.getElementById(
-//                 "chatMessages"
-//             );
-
-//         if (messages) {
-
-//             messages.innerHTML += `
-
-//                 <div class="message-row user-row">
-
-//                     <div class="message-label">
-
-//                         User
-
-//                     </div>
-
-//                     <div class="user-message">
-
-//                         ${message}
-
-//                     </div>
-
-//                 </div>
-
-//                 <div class="message-row ai-row">
-
-//                     <div class="message-label">
-
-//                         AI Study Coach
-
-//                     </div>
-
-//                     <div class="ai-message">
-
-//                         ${data.response}
-
-//                     </div>
-
-//                 </div>
-
-//             `;
-
-//             messages.scrollTop =
-//                 messages.scrollHeight;
-//         }
-
-//         input.value = "";
-//         input.focus();
-
-//     }
-//     catch (error) {
-
-//         console.error(error);
-//     }
-// }
 
 async function sendMessage() {
 
     const input =
-        document.getElementById("chatInput");
+        document.getElementById(
+            "chatInput"
+        );
 
-    if (!input)
+    if (!input) {
         return;
+    }
 
-    const message = input.value.trim();
+    const message =
+        input.value.trim();
 
-    if (!message)
+    if (!message) {
         return;
+    }
 
     const messages =
-        document.getElementById("chatMessages");
+        document.getElementById(
+            "chatMessages"
+        );
 
-    // Immediately display user message
+    if (!messages) {
+        return;
+    }
+
     messages.innerHTML += `
 
         <div class="message-row user-row">
@@ -616,7 +669,6 @@ async function sendMessage() {
 
     `;
 
-    // AI typing placeholder
     const aiMessageId =
         "ai-" + Date.now();
 
@@ -664,9 +716,10 @@ async function sendMessage() {
                         "Content-Type":
                             "application/json"
                     },
-                    body: JSON.stringify({
-                        query: message
-                    })
+                    body:
+                        JSON.stringify({
+                            query: message
+                        })
                 }
             );
 
@@ -675,13 +728,13 @@ async function sendMessage() {
 
         document.getElementById(
             aiMessageId
-        ).innerHTML = data.response;
+        ).innerHTML =
+            data.response;
 
         messages.scrollTop =
             messages.scrollHeight;
 
-    }
-    catch (error) {
+    } catch (error) {
 
         document.getElementById(
             aiMessageId
@@ -691,38 +744,12 @@ async function sendMessage() {
         console.error(error);
     }
 }
+
 /* ===================================
    CALENDAR
 =================================== */
 
 let calendar;
-
-// function initializeCalendar() {
-
-//     const calendarEl =
-//         document.getElementById("calendar");
-
-//     calendar =
-//         new FullCalendar.Calendar(
-//             calendarEl,
-//             {
-//                 initialView:
-//                     "dayGridMonth",
-
-//                 height: 700,
-
-//                 dateClick(info) {
-
-//                     openModal();
-
-//                     document.getElementById(
-//                         "examDate"
-//                     ).value =
-//                         info.dateStr;
-//                 }
-//             }
-//         );
-// }
 
 function initializeCalendar() {
 
@@ -731,14 +758,17 @@ function initializeCalendar() {
             "calendar"
         );
 
-    if (!calendarEl)
+    if (!calendarEl) {
         return;
+    }
 
     calendar =
         new FullCalendar.Calendar(
             calendarEl,
             {
-                initialView: "dayGridMonth",
+                initialView:
+                    "dayGridMonth",
+
                 height: 700,
 
                 dateClick(info) {
@@ -767,8 +797,9 @@ function initializeChart(tasks = []) {
             "energyChart"
         );
 
-    if (!chart)
+    if (!chart) {
         return;
+    }
 
     const subjectHours = {};
 
@@ -779,8 +810,8 @@ function initializeChart(tasks = []) {
             subjectHours[task.subject] = 0;
         }
 
-        // subjectHours[task.subject] += task.hours;
-        subjectHours[task.subject] += Number(task.hours);
+        subjectHours[task.subject] +=
+            Number(task.hours);
     });
 
     const labels =
@@ -794,69 +825,215 @@ function initializeChart(tasks = []) {
         energyChart.destroy();
     }
 
-    energyChart = new Chart(
-        chart,
-        {
-            type: "line",
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: "Today's Study Hours",
-                    data: values
-                }]
+    energyChart =
+        new Chart(
+            chart,
+            {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label:
+                            "Today's Study Hours",
+                        data:
+                            values,
+                        tension:
+                            0.35,
+                        fill:
+                            false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
             }
-        }
-    );
+        );
 }
 
-function renderSchedule(tasks){
+/* ===================================
+   SCHEDULE VIEW
+=================================== */
+
+function renderSchedule(tasks) {
 
     const container =
         document.getElementById(
             "scheduleContainer"
         );
 
-    let html = "";
+    if (!container) {
+        return;
+    }
 
-    tasks.forEach((task,index)=>{
+    const hourHeight =
+        64;
 
-        const startHour =
-            9 + (index * 2);
+    const now =
+        new Date();
 
-        html += `
+    const currentHour =
+        now.getHours();
 
-        <div class="schedule-block">
+    const currentMinute =
+        now.getMinutes();
 
-            <div class="time-label">
+    const currentTimeTop =
+        (currentHour + currentMinute / 60) * hourHeight;
 
-                ${startHour}:00
+    let rowsHtml =
+        "";
+
+    for (let hour = 0; hour < 24; hour++) {
+
+        rowsHtml += `
+
+            <div
+                class="calendar-row"
+                style="height: ${hourHeight}px;">
+
+                <div class="calendar-time">
+
+                    ${formatHour(hour)}
+
+                </div>
+
+                <div class="calendar-line"></div>
 
             </div>
 
-            <div class="study-card">
+        `;
+    }
 
-                <h4>
+    let taskHtml =
+        "";
+
+    let currentStartHour =
+        9;
+
+    tasks.forEach((task) => {
+
+        const duration =
+            Number(task.hours);
+
+        const top =
+            currentStartHour * hourHeight;
+
+        const height =
+            duration * hourHeight;
+
+        taskHtml += `
+
+            <div
+                class="schedule-task-card"
+                style="
+                    top: ${top}px;
+                    height: ${height}px;
+                ">
+
+                <div class="schedule-task-title">
 
                     ${task.subject}
 
-                </h4>
+                </div>
 
-                <span>
+                <div class="schedule-task-meta">
 
-                    ${task.hours} hrs
+                    ${duration} hrs • ${task.status}
 
-                </span>
+                </div>
 
             </div>
 
-        </div>
-
         `;
+
+        currentStartHour +=
+            duration;
     });
 
-    container.innerHTML = html;
-    // initializeChart(tasks);
-    initializeChart(tasks.slice(0, 5));
+    container.innerHTML = `
+
+        <div
+            class="schedule-grid"
+            style="height: ${24 * hourHeight}px;">
+
+            ${rowsHtml}
+
+            <div
+                class="current-time-line"
+                style="top: ${currentTimeTop}px;">
+            </div>
+
+            ${taskHtml}
+
+        </div>
+
+    `;
+
+    requestAnimationFrame(() => {
+
+        const currentLine =
+            container.querySelector(
+                ".current-time-line"
+            );
+
+        if (!currentLine) {
+            return;
+        }
+
+        const targetScrollTop =
+            currentLine.offsetTop -
+            container.clientHeight / 2;
+
+        container.scrollTo({
+            top: targetScrollTop,
+            behavior: "smooth"
+        });
+    });
+
+    initializeChart(
+        tasks.slice(0, 5)
+    );
+}
+
+function scrollToCurrentTime() {
+
+    const container =
+        document.getElementById(
+            "scheduleContainer"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    const currentLine =
+        container.querySelector(
+            ".current-time-line"
+        );
+
+    if (!currentLine) {
+        return;
+    }
+
+    const targetScrollTop =
+        currentLine.offsetTop -
+        container.clientHeight / 2;
+
+    container.scrollTo({
+        top: targetScrollTop,
+        behavior: "smooth"
+    });
 }
 
 /* ===================================
@@ -865,45 +1042,36 @@ function renderSchedule(tasks){
 
 window.onload = async () => {
 
-const savedTheme =
+    const savedTheme =
+        localStorage.getItem(
+            "theme"
+        ) || "light";
 
-    localStorage.getItem("theme") || "light";
+    if (savedTheme === "dark") {
 
-if (savedTheme === "dark") {
+        document.body.classList.add(
+            "dark-theme"
+        );
 
-    document.body.classList.add(
+    } else {
 
-        "dark-theme"
+        document.body.classList.remove(
+            "dark-theme"
+        );
+    }
 
-    );
+    const selectedRadio =
+        document.querySelector(
+            `input[value="${savedTheme}"]`
+        );
 
-} else {
+    if (selectedRadio) {
 
-    document.body.classList.remove(
-
-        "dark-theme"
-
-    );
-
-}
-
-const selectedRadio =
-
-    document.querySelector(
-
-        `input[value="${savedTheme}"]`
-
-    );
-
-if (selectedRadio) {
-
-    selectedRadio.checked = true;
-
-}
+        selectedRadio.checked =
+            true;
+    }
 
     initializeCalendar();
-
-    // initializeChart();
 
     await loadDashboard();
 
@@ -911,5 +1079,3 @@ if (selectedRadio) {
 
     await loadCompletionRecommendation();
 };
-
-
