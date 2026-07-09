@@ -32,7 +32,7 @@ async def create_study_plan(goal:StudyGoal):
             goal.total_hours,
             goal.difficulty,
             goal.preferred_slot,
-            goal.exam_date
+            goal.deadline
         )
     
     for item in plan:
@@ -43,7 +43,8 @@ async def create_study_plan(goal:StudyGoal):
             "hours": item["hours"],
             "difficulty": item["difficulty"],
             "preferred_slot": item["preferred_slot"],
-            "status": "pending"
+            "status": "pending",
+            "deadline":item["deadline"]
         })
 
     return {"message": "Study plan created successfully",

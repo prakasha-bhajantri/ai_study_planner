@@ -7,14 +7,14 @@ const API_BASE = "http://localhost:8000";
 let deadlineCalendar;
 let calendarOpen = false;
 
-function toggleDeadlineCalendar(){
+function toggleDeadlineCalendar() {
 
     const popup =
         document.getElementById(
             "deadlineCalendarPopup"
         );
 
-    if(!deadlineCalendar){
+    if (!deadlineCalendar) {
 
         initializeDeadlineCalendar();
     }
@@ -26,64 +26,79 @@ function toggleDeadlineCalendar(){
         !calendarOpen
     );
 
-    if(calendarOpen){
+    if (calendarOpen) {
 
-        deadlineCalendar.updateSize();
+        setTimeout(() => {
+
+            deadlineCalendar.updateSize();
+
+        }, 50);
     }
 }
 
-function initializeDeadlineCalendar(){
+function initializeDeadlineCalendar() {
 
     const el =
         document.getElementById(
             "deadlineCalendar"
         );
 
+    if (!el) {
+        return;
+    }
+
     deadlineCalendar =
         new FullCalendar.Calendar(
             el,
             {
 
-                initialView:"dayGridMonth",
+                initialView: "dayGridMonth",
 
-                height:280,
+                height: 280,
 
-                headerToolbar:{
+                headerToolbar: {
 
-                    left:"prev,next",
+                    left: "prev,next",
 
-                    center:"title",
+                    center: "title",
 
-                    right:""
+                    right: ""
 
                 },
 
-                dateClick(info){
+                dateClick(info) {
 
+                    // Store ISO date for API
                     document.getElementById(
                         "examDate"
-                    ).value =
-                        info.dateStr;
+                    ).value = info.dateStr;
+
+                    // Format WITHOUT timezone conversion
+                    const [year, month, day] =
+                        info.dateStr.split("-");
+
+                    const months = [
+                        "Jan",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "May",
+                        "Jun",
+                        "Jul",
+                        "Aug",
+                        "Sep",
+                        "Oct",
+                        "Nov",
+                        "Dec"
+                    ];
 
                     const formatted =
-                        new Date(info.dateStr)
-                        .toLocaleDateString(
-                            "en-GB",
-                            {
-
-                                day:"numeric",
-
-                                month:"short",
-
-                                year:"numeric"
-
-                            }
-                        );
+                        `${day} ${months[parseInt(month) - 1]} ${year}`;
 
                     document.getElementById(
                         "selectedDeadline"
                     ).innerHTML =
-                        "📅 " + formatted;
+                        `📅 ${formatted}`;
 
                     toggleDeadlineCalendar();
                 }
@@ -93,6 +108,96 @@ function initializeDeadlineCalendar(){
 
     deadlineCalendar.render();
 }
+
+// let deadlineCalendar;
+// let calendarOpen = false;
+
+// function toggleDeadlineCalendar(){
+
+//     const popup =
+//         document.getElementById(
+//             "deadlineCalendarPopup"
+//         );
+
+//     if(!deadlineCalendar){
+
+//         initializeDeadlineCalendar();
+//     }
+
+//     calendarOpen = !calendarOpen;
+
+//     popup.classList.toggle(
+//         "hidden",
+//         !calendarOpen
+//     );
+
+//     if(calendarOpen){
+
+//         deadlineCalendar.updateSize();
+//     }
+// }
+
+// function initializeDeadlineCalendar(){
+
+//     const el =
+//         document.getElementById(
+//             "deadlineCalendar"
+//         );
+
+//     deadlineCalendar =
+//         new FullCalendar.Calendar(
+//             el,
+//             {
+
+//                 initialView:"dayGridMonth",
+
+//                 height:280,
+
+//                 headerToolbar:{
+
+//                     left:"prev,next",
+
+//                     center:"title",
+
+//                     right:""
+
+//                 },
+
+//                 dateClick(info){
+
+//                     document.getElementById(
+//                         "examDate"
+//                     ).value =
+//                         info.dateStr;
+
+//                     const formatted =
+//                         new Date(info.dateStr)
+//                         .toLocaleDateString(
+//                             "en-GB",
+//                             {
+
+//                                 day:"numeric",
+
+//                                 month:"short",
+
+//                                 year:"numeric"
+
+//                             }
+//                         );
+
+//                     document.getElementById(
+//                         "selectedDeadline"
+//                     ).innerHTML =
+//                         "📅 " + formatted;
+
+//                     toggleDeadlineCalendar();
+//                 }
+
+//             }
+//         );
+
+//     deadlineCalendar.render();
+// }
 function showPage(pageId, element) {
 
     document.querySelectorAll(".page")

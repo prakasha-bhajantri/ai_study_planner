@@ -2,7 +2,7 @@
 services to generate the study plan based on the user's goals and preferences.
 """
 
-def generate_study_plan(subject, total_hours, difficulty, preferred_slot, exam_date):
+def generate_study_plan(subject, total_hours, difficulty, preferred_slot, deadline):
     plan = []
     
     remaining = total_hours
@@ -14,7 +14,8 @@ def generate_study_plan(subject, total_hours, difficulty, preferred_slot, exam_d
             "subject": subject,
             "hours": session_hours,
             "difficulty": difficulty,
-            "preferred_slot": preferred_slot
+            "preferred_slot": preferred_slot,
+            "deadline": deadline
         })
 
         remaining -= session_hours
