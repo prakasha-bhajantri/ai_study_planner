@@ -70,7 +70,7 @@ function initializeDeadlineCalendar() {
 
                     // Store ISO date for API
                     document.getElementById(
-                        "examDate"
+                        "deadline"
                     ).value = info.dateStr;
 
                     // Format WITHOUT timezone conversion
@@ -347,9 +347,9 @@ async function generatePlan() {
                 "slot"
             ).value,
 
-        exam_date:
+        deadline:
             document.getElementById(
-                "examDate"
+                "deadline"
             ).value
     };
 
@@ -881,7 +881,7 @@ function initializeCalendar() {
                     openModal();
 
                     document.getElementById(
-                        "examDate"
+                        "deadline"
                     ).value =
                         info.dateStr;
                 }

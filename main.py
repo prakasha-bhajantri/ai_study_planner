@@ -25,8 +25,9 @@ async def health_check():
 
 @app.post("/generate-plan")
 async def create_study_plan(goal:StudyGoal):
-    # print(goal)
+    print(goal)
     study_goals.append(goal.model_dump())
+    print("study_goals ", study_goals)
     plan = generate_study_plan(
             goal.subject, 
             goal.total_hours,
